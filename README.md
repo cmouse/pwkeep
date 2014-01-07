@@ -6,7 +6,7 @@ Simple password storage system.
 Quick start guide
 =================
 
-Run pwkeep -i to initialize a new storage into ~/.pwkeep. This will create an RSA key pair and a random master key.
+Run pwkeep -i to initialize a new storage into ~/.pwkeep. This will create an RSA key pair.
 
 If you want to tune the algorithm(s), key sizes and such, you can create ~/.pwkeep/config.yml (see below for syntax).
 
@@ -52,10 +52,6 @@ File formats
 ============
 
 The private.pem file contains your private key. It is fully manipulatable with openssl binary without any specialities.
-
-master.key is a binary file containing your random key. It can be decrypted with
-
-    openssl rsautl -inkey private.pem -oaep -decrypt < master.tmp > master.plain
 
 system-\* files contain actual credentials. The file name consists from system- prefix and hashed system name. The system
 name is hashed iterations time with chosen hash, SHA512 by default.

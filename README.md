@@ -1,5 +1,6 @@
 PassWord Keep (pwkeep)
 ======================
+[![Gem Version](https://badge.fury.io/rb/pwkeep.png)](http://badge.fury.io/rb/pwkeep)
 
 Simple password storage system. 
 

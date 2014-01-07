@@ -62,7 +62,7 @@ class Storage
    def system_to_hash(system)
      d = Digest.const_get(@options[:digest].upcase).new
 
-     system_h = system
+     system_h = system.downcase
      (0..@options[:iterations]).each do
          system_h = d.update(system_h).digest
          d.reset
@@ -70,21 +70,17 @@ class Storage
      "system-#{Base64.urlsafe_encode64(system_h)}"
    end
 
-   def load_system(system)
+   def decrypt_system(file)
      unless @key
        raise PWKeep::Exception, "Private key required"
      end
-
-     system_h = system_to_hash(system)
-     raise "Cannot find #{system}" unless path.join(system_h).exist?
-
      # found it, decrypt and load json
      # the file contains crypto name, iv len, iv, data
      header = nil
      data = nil
-     path.join(system_h).open('rb') { |io| 
+     file.open('rb') { |io|
        header = io.read @options[:keysize]/8
-       data = io.read 
+       data = io.read
      }
 
      # header
@@ -98,7 +94,43 @@ class Storage
      cipher.key = header[2]
 
      # perform decrypt
-     data = cipher.update(data) + cipher.final
+     cipher.update(data) + cipher.final
+   end
+
+   def encrypt_system(file, data)
+     unless @key
+       raise PWKeep::Exception, "Private key required"
+     end
+
+     # encrypt data
+     cipher = OpenSSL::Cipher::Cipher.new @options[:cipher]
+     cipher.encrypt
+
+     # use one time key and iv
+     iv = cipher.random_iv
+     key = cipher.random_key
+
+     header = [cipher.name, iv, key].pack("Z*a#{cipher.iv_len}a#{cipher.key_len}")
+     blob = cipher.update(data) + cipher.final
+
+     # store system name to make search work
+     file.open('wb') do |io|
+         io.write @key.public_encrypt header, 4
+         io.write blob
+     end
+
+     true
+   end
+
+   def load_system(system)
+     unless @key
+       raise PWKeep::Exception, "Private key required"
+     end
+
+     system_h = system_to_hash(system)
+     raise "Cannot find #{system}" unless path.join(system_h).exist?
+
+     data = decrypt_system(path.join(system_h))
 
      unless data[0] == "{" and data[-1] == "}" 
        raise PWKeep::Exception, "Corrupted data file"
@@ -114,27 +146,31 @@ class Storage
 
      # write system
      system_h = system_to_hash(system)
-     # encrypt data
-     cipher = OpenSSL::Cipher::Cipher.new @options[:cipher]
-     cipher.encrypt
-
-     # use one time key and iv
-     iv = cipher.random_iv
-     key = cipher.random_key
 
      data = { :system => system, :data => data, :stored_at => Time.now }
-     header = [cipher.name, iv, key].pack("Z*a#{cipher.iv_len}a#{cipher.key_len}")
-     blob = cipher.update(data.to_json) + cipher.final
-
-     # store system name to make search work 
-     path.join(system_h).open('wb') do |io|
-         io.write @key.public_encrypt header, 4
-         io.write blob
-     end
+     encrypt_system(path.join(system_h), data)
    end
 
    def valid?
      path.join('private.pem').exist? 
+   end
+
+   def delete(system)
+     data = load_system(system)
+     unless data[:system] == system
+       raise "System not found"
+     end
+    
+     path.join(system_to_hash(system)).delete!
+   end
+
+   def list_all_systems
+     systems = []
+     path.entries.each do |s|
+         next unless s.fnmatch? "system-*"
+         systems << JSON.load(decrypt_system(path.join(s)))["system"]
+     end
+     systems
    end
 end
 

@@ -10,8 +10,12 @@ Gem::Specification.new do |s|
   s.files = `git ls-files`.split("\n")
   s.executables = %w( pwkeep )
   s.require_path = 'lib'
+  s.license = 'MIT'
   s.add_dependency 'bundler'
-  s.add_dependency 'ruby-gpgme'
-  s.add_dependency 'colored'
+  s.add_dependency 'colorize'
   s.add_dependency 'highline'
+  s.add_dependency 'trollop'
+  s.add_dependency 'lockfile'
+  s.add_dependency 'hashr'
+  s.add_dependency 'ruco'
 end

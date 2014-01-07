@@ -148,7 +148,7 @@ class Storage
      system_h = system_to_hash(system)
 
      data = { :system => system, :data => data, :stored_at => Time.now }
-     encrypt_system(path.join(system_h), data)
+     encrypt_system(path.join(system_h), data.to_json)
    end
 
    def valid?

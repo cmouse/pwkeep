@@ -108,7 +108,7 @@ EOS
            result = PWKeep.run_editor(data, {})
   
            unless result[0]
-             raise "Not modified"
+             raise PWKeep::Exception, "Not modified"
            end
   
            pw = ask("Enter your password:") { |q| q.echo = false }
@@ -124,7 +124,7 @@ EOS
            data = @storage.load_system opts[:system]
            result = PWKeep.run_editor(data[:data], {})
            unless result[0]
-             raise "Not modified"
+             raise PWKeep::Exception, "Not modified"
            end
            @storage.save_system opts[:system], result[1]
            say("<%= color('Changes stored', GREEN)%>")
@@ -164,9 +164,9 @@ EOS
            end
            return
          end
-       rescue PWKeep::Exception => e
+       rescue PWKeep::Exception => e1
         PWKeep::logger.error e.message.colorize(:red)
-       rescue OpenSSL::PKey::RSAError => e
+       rescue OpenSSL::PKey::RSAError => e2
         PWKeep::logger.error "Cannot load private key".colorize(:red)
        end
      end

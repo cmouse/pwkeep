@@ -25,12 +25,12 @@ Configuration
 
 The configuration file is a simple YAML formatted file with following syntax
 
-  \-\-\-
-    # less than 1k makes no sense. your files will be at least this / 8 bytes. 
-    keysize: 2048 
-    iterations: 2000
-    # do not edit the following unless you know what you are doing
-    cipher: AES-256-CTR
+   ---
+     # less than 1k makes no sense. your files will be at least this / 8 bytes. 
+     keysize: 2048 
+     iterations: 2000
+     # do not edit the following unless you know what you are doing
+     cipher: AES-256-CTR
 
 File formats
 ============

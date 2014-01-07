@@ -6,6 +6,7 @@ PATH
       colorize
       hashr
       highline
+      keepass-password-generator
       lockfile
       ruco
       trollop
@@ -18,6 +19,7 @@ GEM
     dispel (0.0.3)
     hashr (0.0.22)
     highline (1.6.20)
+    keepass-password-generator (0.1.1)
     language_sniffer (1.0.2)
     lockfile (2.1.0)
     plist (3.1.0)

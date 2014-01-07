@@ -1,9 +1,14 @@
 require 'highline/import'
+require 'keepass/password'
 
 module PWKeep
 
 class Main
    attr :opts
+
+   def initialize
+     @opts = { :home => ENV['PWKEEP_HOME'] || '~/.pwkeep' } # required value
+   end
 
    def setup
      @opts = Trollop::options do
@@ -44,57 +49,88 @@ EOS
      Main.new.run
    end
 
+   def load_config
+     config_file = Pathname.new(@opts[:home]).expand_path.join('config.yml')
+     if config_file.exist? 
+        PWKeep::Config.instance.load(config_file)
+     end 
+   end
+
    def run
      setup
+     load_config
+     @storage = PWKeep::Storage.new(:path => opts[:home])
+
      begin
        if opts[:initialize]
-         @storage = PWKeep::Storage.new(:path => opts[:home])
-#         @storage.create
-#         # create a keypair
-#         pw_a = ""
-#         pw_b = ""
-#         while(pw_a == "" or pw_a != pw_b)
-#            pw_a = ask("Enter your password:   ") { |q| q.echo = false }
-#            pw_b = ask("Confirm your password: ") { |q| q.echo = false }
-#            say("<%= color('red') %>Passwords did not match") unless pw_a == pw_b
-#         end
-#         @storage.keypair_create(pw_b)
-#         # this concludes initialization
-#         say("<%= color('green') %>Password storage initialized")
-          pw_b = 'test'
-          @storage.keypair_load(pw_b)
-          @storage.master_key_load
-          data = @storage.load_system "test"
+         @storage.create
 
-          Dispel::Screen.open do |screen|
-            $ruco_screen = screen
-            app = PWKeep::EditorApplication.new(data.to_s, 
-              :lines => screen.lines, :columns => screen.columns
-            )
-          
-            screen.draw *app.display_info
-          
-            Dispel::Keyboard.output do |key|
-              if key == :resize
-                app.resize(screen.lines, screen.columns)
-              else
-                result = app.key key
-                if result == :quit
-                  data = app.content
-                  break
-                end
-              end
-          
-              screen.draw *app.display_info
-            end
-          end
+         if @storage.valid? 
+           say("<%= color('WARNING!', BOLD) %> a valid pwkeep storage was found!")
+           say("If you continue, the existing storage becomes <%= color('UNUSABLE', BOLD) %>")
+           unless agree("Continue (y/n)? ") 
+             raise PWKeep::Exception, "Storage initialization aborted" 
+           end
+         end
+
+         # create a keypair
+         pw_a = ""
+         pw_b = ""
+         while(pw_a == "" or pw_a != pw_b)
+            pw_a = ask("Enter your password:   ") { |q| q.echo = false }
+            pw_b = ask("Confirm your password: ") { |q| q.echo = false }
+            say("<%= color('Passwords did not match', RED %>") unless pw_a == pw_b
+         end
+         @storage.keypair_create(pw_b)
+         # this concludes initialization
+         say("<%= color('Password storage initialized', GREEN %>")
+         return
+       end
  
-          # FIXME: Check if there has been actual change.
-          @storage.save_system "test", data
-          say("<%= color('Contents updated', GREEN) %>")
+       raise "Storage not initialized (run with --initialize)" unless @storage.valid? 
+
+       if opts[:view]
+         pw = ask("Enter your password:") { |q| q.echo = false }
+         @storage.keypair_load pw
+ 
+         data = @storage.load_system opts[:system]
+
+         say("Last edited: #{data[:stored_at]}\nSystem: #{data[:system]}\n\n")
+         say(data[:data])
+         return 
+       end
+
+       if opts[:create]
+         data = "Username: \nPassword: #{KeePass::Password.generate('uullA{6}')}"
+         
+         result = PWKeep.run_editor(data, {})
+
+         unless result[0]
+           raise "Not modified"
+         end
+
+         pw = ask("Enter your password:") { |q| q.echo = false }
+         @storage.keypair_load pw
+         @storage.save_system opts[:system], result[1]
+         say("<%= color('Changes stored', GREEN)%>")
+         return
+       end
+
+       if opts[:edit]
+         pw = ask("Enter your password:") { |q| q.echo = false }
+         @storage.keypair_load pw
+         data = @storage.load_system opts[:system]
+         result = PWKeep.run_editor(data[:data], {})
+         unless result[0]
+           raise "Not modified"
+         end
+         @storage.save_system opts[:system], result[1]
+         say("<%= color('Changes stored', GREEN)%>")
+         return
        end
      rescue PWKeep::Exception => e
       PWKeep::logger.error e.message.colorize(:red)
+      return
      end
    end
 end

@@ -64,4 +64,5 @@ The actual file format is:
     * 32 byte key (algorithm dependant)
   * data: encrypted credential with above key+id
 
-You cannot decrypt this with openssl directly, but you can easily write a program to do this. 
+You cannot decrypt this with openssl directly, but you can easily write a program to do this. The header is padded with OAEP 
+padding. 

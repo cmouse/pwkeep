@@ -165,7 +165,7 @@ EOS
            return
          end
        rescue PWKeep::Exception => e1
-        PWKeep::logger.error e.message.colorize(:red)
+        PWKeep::logger.error e1.message.colorize(:red)
        rescue OpenSSL::PKey::RSAError => e2
         PWKeep::logger.error "Cannot load private key".colorize(:red)
        end

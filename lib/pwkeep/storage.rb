@@ -158,7 +158,7 @@ class Storage
    def delete(system)
      data = load_system(system)
      unless data[:system] == system
-       raise "System not found"
+       raise PWKeep::Exception, "System not found"
      end
     
      path.join(system_to_hash(system)).delete!

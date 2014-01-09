@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII" />
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.8.6.2
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '';
+  framesUrl = "frames.html#!" + escape(window.location.href);
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+      Class List
+    </a>
+  
+    <a class="full_list_link" id="method_list_link"
+        href="method_list.html">
+      Method List
+    </a>
+  
+    <a class="full_list_link" id="file_list_link"
+        href="file_list.html">
+      File List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content"><div id='filecontents'><h1>PassWord Keep (pwkeep)</h1>
+
+<p><a href="http://badge.fury.io/rb/pwkeep"><img src="https://badge.fury.io/rb/pwkeep.png" alt="Gem Version"></a></p>
+
+<p>Simple password storage system. </p>
+
+<h1>Quick start guide</h1>
+
+<p>Run pwkeep -i to initialize a new storage into ~/.pwkeep. This will create an RSA key pair.</p>
+
+<p>If you want to tune the algorithm(s), key sizes and such, you can create ~/.pwkeep/config.yml (see below for syntax).</p>
+
+<p>If you want to place it somewhere else, set PWKEEP_HOME environment variable, or use -H (--home) parameter when running pwkeep. </p>
+
+<p>To add credentials, use</p>
+
+<pre class="code ruby"><code class="ruby">pwkeep -c -n &lt;name of cred&gt;
+</code></pre>
+
+<p>To modify them</p>
+
+<pre class="code ruby"><code class="ruby">pwkeep -e -n &lt;name&gt;
+</code></pre>
+
+<p>And to show</p>
+
+<pre class="code ruby"><code class="ruby">pwkeep -v -n &lt;name&gt;
+</code></pre>
+
+<p>See --help for more options.</p>
+
+<h1>Features</h1>
+
+<p>Password keep is intended to be simple and easy to use. It uses RSA + AES256 encryption for your credentials. The
+data is not restricted to usernames and passwords, you can store whatever you want.</p>
+
+<p>Editing is done with embedded ruco text editor using memory-only backing. No temporary files are used. </p>
+
+<h1>Configuration</h1>
+
+<p>The configuration file is a simple YAML formatted file with following syntax (<em>NOT YET SUPPORTED</em>)</p>
+
+<pre class="code yaml"><code class="yaml">---
+  # less than 1k makes no sense. your files will be at least this / 8 bytes. 
+  keysize: 2048 
+  iterations: 2000
+  # do not edit the following unless you know what you are doing. 
+  cipher: AES-256-CTR
+</code></pre>
+
+<h1>File formats</h1>
+
+<p>The private.pem file contains your private key. It is fully manipulatable with openssl binary without any specialities.</p>
+
+<p>system-* files contain actual credentials. The file name consists from system- prefix and hashed system name. The system
+name is hashed iterations time with chosen hash, SHA512 by default.</p>
+
+<p>The actual file format is:</p>
+
+<ul>
+<li>header (encrypted with your public key)
+
+<ul>
+<li>nil terminated algorithm name</li>
+<li>16 byte iv (algorithm dependant)</li>
+<li>32 byte key (algorithm dependant)</li>
+</ul></li>
+<li>data: encrypted credential with above key+id</li>
+</ul>
+
+<p>You cannot decrypt this with openssl directly, but you can easily write a program to do this. The header is padded with OAEP 
+padding. </p>
+</div></div>
+
+    <div id="footer">
+  Generated on Thu Jan  9 16:06:06 2014 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.6.2 (ruby-1.9.3).
+</div>
+
+  </body>
+</html>

@@ -17,7 +17,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'trollop'
   s.add_dependency 'lockfile'
   s.add_dependency 'hashr'
-  s.add_dependency 'ruco'
   s.add_dependency 'keepass-password-generator'
   s.add_dependency 'yard'
 end

@@ -6,7 +6,6 @@ require 'pathname'
 require 'colorize'
 require 'lockfile'
 require 'openssl'
-require 'ruco'
 
 module PWKeep
   extend self

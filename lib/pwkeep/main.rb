@@ -8,6 +8,24 @@ module PWKeep
      def initialize
        @opts = { :home => ENV['PWKEEP_HOME'] || '~/.pwkeep' } # required value
      end
+
+     def keypair_load
+       counter = 0
+       while true 
+         begin
+           pw = ask("Enter your password:") { |q| q.echo = false }
+           @storage.keypair_load pw
+         rescue OpenSSL::PKey::RSAError => e
+           say "<%= color('Invalid password', RED) %>"
+           counter = counter + 1
+           if (counter>2) 
+             raise e
+           end
+           next
+         end
+         break
+       end
+     end
   
      def setup
        @opts = Trollop::options do
@@ -92,8 +110,7 @@ EOS
          raise "Storage not initialized (run with --initialize)" unless @storage.valid? 
   
          if opts[:view]
-           pw = ask("Enter your password:") { |q| q.echo = false }
-           @storage.keypair_load pw
+           keypair_load
    
            data = @storage.load_system opts[:system]
   
@@ -111,16 +128,14 @@ EOS
              raise PWKeep::Exception, "Not modified"
            end
   
-           pw = ask("Enter your password:") { |q| q.echo = false }
-           @storage.keypair_load pw
+           keypair_load
            @storage.save_system opts[:system], result[1]
            say("<%= color('Changes stored', GREEN)%>")
            return
          end
   
          if opts[:edit]
-           pw = ask("Enter your password:") { |q| q.echo = false }
-           @storage.keypair_load pw
+           keypair_load
            data = @storage.load_system opts[:system]
            result = PWKeep.run_editor(data[:data], {})
            unless result[0]
@@ -132,8 +147,7 @@ EOS
          end
   
          if opts[:delete]
-           pw = ask("Enter your password:") { |q| q.echo = false }
-           @storage.keypair_load pw
+           keypair_load
            data = @storage.load_system opts[:system]
            # just to be sure
            unless agree("Are you <%=color('SURE',BOLD)%> you want to delete #{data[:system]}?")
@@ -144,8 +158,7 @@ EOS
          end
   
          if opts[:search]
-           pw = ask("Enter your password:") { |q| q.echo = false }
-           @storage.keypair_load pw
+           keypair_load
            say("All matching systems\n")
            @storage.list_all_systems.sort.each do |system|
              if system.match opts[:search]
@@ -156,8 +169,7 @@ EOS
          end
   
          if opts[:list]
-           pw = ask("Enter your password:") { |q| q.echo = false }
-           @storage.keypair_load pw
+           keypair_load
            say("All known systems\n")
            @storage.list_all_systems.sort.each do |system| 
              say("  - #{system}")
@@ -168,6 +180,8 @@ EOS
         PWKeep::logger.error e1.message.colorize(:red)
        rescue OpenSSL::PKey::RSAError => e2
         PWKeep::logger.error "Cannot load private key".colorize(:red)
+       rescue SystemExit,Interrupt
+        # ignore
        end
      end
   end

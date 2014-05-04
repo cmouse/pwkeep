@@ -50,23 +50,17 @@ class Storage
      @key = OpenSSL::PKey::RSA.new key_pem, password
    end
 
-   def master_key_load
-     unless @key
-       raise PWKeep::Exception, "RSA private key required"
-     end
-
-     # load the key
-     @master_key = @key.private_decrypt(path.join('master.key').open('rb') { |io| io.read },4)
-   end
-
    def system_to_hash(system)
      d = Digest.const_get(@options[:digest].upcase).new
 
-     system_h = system.downcase
+     # hash with public key to prevent dictionary attacks
+     system_h = system.downcase + @key.public_key.to_der
+
      (0..@options[:iterations]).each do
          system_h = d.update(system_h).digest
          d.reset
      end
+  
      "system-#{Base64.urlsafe_encode64(system_h)}"
    end
 
@@ -167,10 +161,26 @@ class Storage
    def list_all_systems
      systems = []
      path.entries.each do |s|
-         next unless s.fnmatch? "system-*"
-         systems << JSON.load(decrypt_system(path.join(s)))["system"]
+       next unless s.fnmatch? "system-*"
+       systems << JSON.load(decrypt_system(path.join(s)))["system"]
      end
      systems
+   end
+
+   def migrate
+     count = 0
+     path.entries.each do |s|
+       next unless s.fnmatch? "system-*"
+       # check whether name matches the system name
+       system = JSON.load(decrypt_system(path.join(s)))["system"]
+       system_h = system_to_hash system
+       
+       if s.to_s != system_h
+         count = count + 1
+         File.rename path.join(s), path.join(system_h)
+       end
+     end
+     count
    end
 end
 

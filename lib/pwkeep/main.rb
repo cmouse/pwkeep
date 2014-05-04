@@ -49,6 +49,7 @@ EOS
          opt :list, "List all known systems", :short => '-l'
          opt :help, "Show usage", :short => '-h'
          opt :home, "Home directory", :short => '-H', :type => :string, :default => ( ENV['PWKEEP_HOME'] || '~/.pwkeep' )
+         opt :migrate, "Migrate from old storage format(s)"
          opt :version, "Show version", :short => '-V'
        end
   
@@ -62,7 +63,7 @@ EOS
        Trollop::die :initialize, "can only have one mode of operation" if opts[:initialize] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:search] or opts[:list])
        Trollop::die :list, "can only have one mode of operation" if opts[:list] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:search] or opts[:initialize])
   
-       Trollop::die "You must choose one mode of operation" unless opts[:create] or opts[:edit] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list]
+       Trollop::die "You must choose one mode of operation" unless opts[:create] or opts[:edit] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list] or opts[:migrate]
      end
   
      def self.run
@@ -174,6 +175,14 @@ EOS
            @storage.list_all_systems.sort.each do |system| 
              say("  - #{system}")
            end
+           return
+         end
+
+         if opts[:migrate]
+           keypair_load
+           say("Migrating systems...\n")
+           count = @storage.migrate
+           say("Migrated #{count} systems\n")
            return
          end
        rescue PWKeep::Exception => e1

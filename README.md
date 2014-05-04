@@ -27,13 +27,15 @@ And to show
 
 See --help for more options.
 
+When upgrading from <0.4, please run --migrate once to rename your files.  
+
 Features
 ========
 
 Password keep is intended to be simple and easy to use. It uses RSA + AES256 encryption for your credentials. The
 data is not restricted to usernames and passwords, you can store whatever you want.
 
-Editing is done with embedded ruco text editor using memory-only backing. No temporary files are used. 
+Editing is done with vipe, which you need to install.  
 
 Configuration
 =============
@@ -55,7 +57,7 @@ File formats
 The private.pem file contains your private key. It is fully manipulatable with openssl binary without any specialities.
 
 system-\* files contain actual credentials. The file name consists from system- prefix and hashed system name. The system
-name is hashed iterations time with chosen hash, SHA512 by default.
+name is encrypted with your public key, then hashed iterations time with chosen hash, SHA512 by default.
 
 The actual file format is:
  

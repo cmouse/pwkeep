@@ -57,7 +57,7 @@ File formats
 The private.pem file contains your private key. It is fully manipulatable with openssl binary without any specialities.
 
 system-\* files contain actual credentials. The file name consists from system- prefix and hashed system name. The system
-name is encrypted with your public key, then hashed iterations time with chosen hash, SHA512 by default.
+name is hashed by appending your public key in DER format, then hashed iterations time with chosen hash, SHA512 by default.
 
 The actual file format is:
  
@@ -69,3 +69,36 @@ The actual file format is:
 
 You cannot decrypt this with openssl directly, but you can easily write a program to do this. The header is padded with OAEP 
 padding. 
+
+Following is a sample code for decrypting an entry
+
+```
+require 'openssl'
+
+def decrypt_system(file)
+  key_pem = File.read('/home/user/.pwkeep/private.pem')
+  key = OpenSSL::PKey::RSA.new key_pem, "password"
+
+  header = nil
+  data = nil
+  File.open(file, 'rb') { |io|
+    header = io.read 2048/8
+    data = io.read
+  }
+
+  # header
+  cipher = key.private_decrypt(header,4).unpack('Z*')[0]
+  cipher = OpenSSL::Cipher.new cipher
+  # re-unpack now that we know the size of the rest of the fields...
+  header = key.private_decrypt(header,4).unpack("Z*a#{cipher.iv_len}a#{cipher.key_len}")
+
+  cipher.decrypt
+  cipher.iv = header[1]
+  cipher.key = header[2]
+
+  # perform decrypt
+  cipher.update(data) + cipher.final
+end
+
+p decrypt_system "/home/user/.pwkeep/system-1MR0bWy4qqjyTCdppUpYQTWpq5Zv8LavKxx7gBfVrYPGoZmtJR-xT0Ok7G20RAtOBjz9V3VSp2ULucf9jSol9g=="
+```

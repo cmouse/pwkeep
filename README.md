@@ -82,7 +82,7 @@ def decrypt_system(file)
   header = nil
   data = nil
   File.open(file, 'rb') { |io|
-    header = io.read 2048/8
+    header = io.read 2048/8 # size of your private key
     data = io.read
   }
 

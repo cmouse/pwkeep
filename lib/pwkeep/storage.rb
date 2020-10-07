@@ -155,7 +155,7 @@ class Storage
        raise PWKeep::Exception, "System not found"
      end
     
-     path.join(system_to_hash(system)).delete!
+     path.join(system_to_hash(system)).delete
    end
 
    def list_all_systems

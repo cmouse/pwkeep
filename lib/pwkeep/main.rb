@@ -151,10 +151,12 @@ EOS
            keypair_load
            data = @storage.load_system opts[:system]
            # just to be sure
-           unless agree("Are you <%=color('SURE',BOLD)%> you want to delete #{data[:system]}?")
+           if agree("Are you <%=color('SURE',BOLD)%> you want to delete #{data[:system]}?")
              @storage.delete data[:system]
+	     say("<%= color('System deleted', YELLOW)%>")
+           else
+             say("<%= color('System NOT deleted', GREEN)%>")
            end
-           say("<%= color('System deleted', YELLOW)%>")
            return
          end
   

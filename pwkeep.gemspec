@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'pwkeep'
-  s.version = '0.0.4'
+  s.version = '0.0.5'
   s.platform = Gem::Platform::RUBY
   s.authors = [ 'Aki Tuomi']
   s.email = %w( aki.tuomi@g-works.fi )

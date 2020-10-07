@@ -1,5 +1,5 @@
 require 'bundler/setup'
-require 'trollop'
+require 'optimist'
 require 'digest/sha2'
 require 'logger'
 require 'pathname'

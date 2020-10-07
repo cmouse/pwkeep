@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'bundler'
   s.add_dependency 'colorize'
   s.add_dependency 'highline'
-  s.add_dependency 'trollop'
+  s.add_dependency 'optimist'
   s.add_dependency 'lockfile'
   s.add_dependency 'hashr'
   s.add_dependency 'keepass-password-generator'

@@ -28,7 +28,7 @@ module PWKeep
      end
   
      def setup
-       @opts = Trollop::options do
+       @opts = Optimist::options do
          version "0.0.1 (c) 2014 Aki Tuomi"
          banner <<-EOS
 This program is a simple password storage utility. Distributed under MIT license. NO WARRANTY.
@@ -54,16 +54,16 @@ EOS
        end
   
        # validate options
-       Trollop::die :system, "must be given for create/show/edit/delete" if opts[:system].nil? and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create])
-       Trollop::die :create, "can only have one mode of operation" if opts[:create] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list])
-       Trollop::die :edit, "can only have one mode of operation" if opts[:edit] and (opts[:create] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list])
-       Trollop::die :view, "can only have one mode of operation" if opts[:view] and (opts[:edit] or opts[:create] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list])
-       Trollop::die :delete, "can only have one mode of operation" if opts[:delete] and (opts[:edit] or opts[:view] or opts[:create] or opts[:search] or opts[:initialize] or opts[:list])
-       Trollop::die :search, "can only have one mode of operation" if opts[:search] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:initialize] or opts[:list])
-       Trollop::die :initialize, "can only have one mode of operation" if opts[:initialize] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:search] or opts[:list])
-       Trollop::die :list, "can only have one mode of operation" if opts[:list] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:search] or opts[:initialize])
-  
-       Trollop::die "You must choose one mode of operation" unless opts[:create] or opts[:edit] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list] or opts[:migrate]
+       Optimist::die :system, "must be given for create/show/edit/delete" if opts[:system].nil? and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create])
+       Optimist::die :create, "can only have one mode of operation" if opts[:create] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list])
+       Optimist::die :edit, "can only have one mode of operation" if opts[:edit] and (opts[:create] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list])
+       Optimist::die :view, "can only have one mode of operation" if opts[:view] and (opts[:edit] or opts[:create] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list])
+       Optimist::die :delete, "can only have one mode of operation" if opts[:delete] and (opts[:edit] or opts[:view] or opts[:create] or opts[:search] or opts[:initialize] or opts[:list])
+       Optimist::die :search, "can only have one mode of operation" if opts[:search] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:initialize] or opts[:list])
+       Optimist::die :initialize, "can only have one mode of operation" if opts[:initialize] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:search] or opts[:list])
+       Optimist::die :list, "can only have one mode of operation" if opts[:list] and (opts[:edit] or opts[:view] or opts[:delete] or opts[:create] or opts[:search] or opts[:initialize])
+
+       Optimist::die "You must choose one mode of operation" unless opts[:create] or opts[:edit] or opts[:view] or opts[:delete] or opts[:search] or opts[:initialize] or opts[:list] or opts[:migrate]
      end
   
      def self.run
